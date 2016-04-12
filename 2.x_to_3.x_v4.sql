@@ -1,0 +1,104 @@
+#Enter your database
+USE your_database_here ;
+START TRANSACTION;
+#Tablesuffix
+SET @SUFFIX='yourSuffixhere';
+#Preparation and Execution
+SET @sqltext = CONCAT('ALTER TABLE tbl_playerstats',@SUFFIX,' ENGINE = MyISAM');
+PREPARE stmt1 FROM @sqltext;
+EXECUTE stmt1;
+SET @sqltext = CONCAT('CREATE TABLE tbl_playerstats',@SUFFIX,'_old SELECT * FROM tbl_playerstats',@SUFFIX);
+PREPARE stmt2 FROM @sqltext;
+EXECUTE stmt2;
+SET @sqltext = CONCAT('ALTER TABLE  tbl_playerstats',@SUFFIX,'_old CHANGE COLUMN `ID` `ID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT , ADD PRIMARY KEY (`ID`)');
+PREPARE stmt3 FROM @sqltext;
+EXECUTE stmt3;
+SET @sqltext = CONCAT('CREATE TABLE tbl_playerdata',@SUFFIX,' SELECT ID AS PlayerID, SoldierName, GUID, CountryCode FROM tbl_playerstats',@SUFFIX);
+PREPARE stmt4 FROM @sqltext;
+EXECUTE stmt4;
+SET @sqltext = CONCAT('ALTER TABLE tbl_playerdata',@SUFFIX,' ADD COLUMN `ClanTag` VARCHAR(45) NULL DEFAULT NULL  AFTER `PlayerID` , ADD COLUMN `EAGUID` VARCHAR(35) NULL DEFAULT NULL  AFTER `GUID` , ADD COLUMN `IP_Address` VARCHAR(15) NULL DEFAULT NULL  AFTER `EAGUID` , CHANGE COLUMN `PlayerID` `PlayerID` INT(10) UNSIGNED NULL AUTO_INCREMENT  
+, ADD PRIMARY KEY (`PlayerID`) 
+, ADD UNIQUE KEY `SoldierNameGUID` (`SoldierName` ASC, `GUID` ASC)');
+PREPARE stmt5 FROM @sqltext;
+EXECUTE stmt5;
+SET @sqltext = CONCAT('CREATE TABLE tbl_weaponstats',@SUFFIX,' SELECT * FROM tbl_playerstats',@SUFFIX);
+PREPARE stmt6 FROM @sqltext;
+EXECUTE stmt6;
+SET @sqltext = CONCAT('ALTER TABLE tbl_weaponstats',@SUFFIX,' DROP COLUMN `LastSeenOnServer` , DROP COLUMN `FirstSeenOnServer` , DROP COLUMN `CountryCode` , DROP COLUMN `playerRounds` , DROP COLUMN `playerHeadshots` , DROP COLUMN `playerPlaytime` , DROP COLUMN `playerScore` , DROP COLUMN `playerSuicide` , DROP COLUMN `playerDeaths` , DROP COLUMN `playerKills` , DROP COLUMN `playerTKs` , DROP COLUMN `GUID` , DROP COLUMN `SoldierName` , CHANGE COLUMN `ID` `WeaponStatsID` INT(10) UNSIGNED NOT NULL  
+, ADD PRIMARY KEY (`WeaponStatsID`)');
+PREPARE stmt7 FROM @sqltext;
+EXECUTE stmt7;
+SET @sqltext = CONCAT('DROP TABLE tbl_playerstats',@SUFFIX);
+PREPARE stmt8 FROM @sqltext;
+EXECUTE stmt8;
+SET @sqltext = CONCAT('CREATE TABLE tbl_playerstats',@SUFFIX,' SELECT ID AS StatsID, playerScore, playerKills, playerHeadshots, playerDeaths, playerSuicide, playerTKs, playerPlaytime, playerRounds, FirstSeenOnServer, LastSeenOnServer FROM tbl_playerstats',@SUFFIX,'_old');
+PREPARE stmt9 FROM @sqltext;
+EXECUTE stmt9;
+SET @sqltext = CONCAT('ALTER TABLE tbl_playerstats',@SUFFIX,' CHANGE COLUMN `StatsID` `StatsID` INT(10) UNSIGNED NOT NULL, CHANGE COLUMN `playerScore` `playerScore` INT(11)  NOT NULL DEFAULT 0
+, ADD PRIMARY KEY (`StatsID`)'); 
+PREPARE stmt10 FROM @sqltext;
+EXECUTE stmt10;
+SET @sqltext = CONCAT('ALTER TABLE tbl_playerstats',@SUFFIX,'_old 
+ADD UNIQUE KEY `SoldierNameGUID` (`SoldierName` ASC, `GUID` ASC)');
+PREPARE stmt11 FROM @sqltext;
+EXECUTE stmt11;
+SET @sqltext = CONCAT('ALTER TABLE tbl_playerstats',@SUFFIX,' ADD COLUMN `Killstreak` INT NOT NULL DEFAULT 0  AFTER `LastSeenOnServer` , ADD COLUMN `Deathstreak` INT NOT NULL DEFAULT 0  AFTER `Killstreak`');
+PREPARE stmt12 FROM @sqltext;
+EXECUTE stmt12;
+SET @sqltext = CONCAT('ALTER TABLE tbl_weaponstats',@SUFFIX,' 
+ ADD COLUMN `M16K_kills` INT(10) UNSIGNED NOT NULL DEFAULT 0  AFTER `M16_deaths` , 
+ ADD COLUMN `M16K_hs` INT(10) UNSIGNED NOT NULL DEFAULT 0  AFTER `M16K_kills` , 
+ ADD COLUMN `M16K_deaths` INT(10) UNSIGNED NOT NULL DEFAULT 0  AFTER `M16K_hs` , 
+ ADD COLUMN `UMPK_kills` INT(10) UNSIGNED NOT NULL DEFAULT 0  AFTER `UMP_deaths` , 
+ ADD COLUMN `UMPK_hs` INT(10) UNSIGNED NOT NULL DEFAULT 0  AFTER `UMPK_kills` , 
+ ADD COLUMN `UMPK_deaths` INT(10) UNSIGNED NOT NULL DEFAULT 0  AFTER `UMPK_hs` , 
+ ADD COLUMN `MG3K_kills` INT(10) UNSIGNED NOT NULL DEFAULT 0  AFTER `MG3_deaths` , 
+ ADD COLUMN `MG3K_hs` INT(10) UNSIGNED NOT NULL DEFAULT 0  AFTER `MG3K_kills` , 
+ ADD COLUMN `MG3K_deaths` INT(10) UNSIGNED NOT NULL DEFAULT 0  AFTER `MG3K_hs` , 
+ ADD COLUMN `M95K_kills` INT(10) UNSIGNED NOT NULL DEFAULT 0  AFTER `M95_deaths` , 
+ ADD COLUMN `M95K_hs` INT(10) UNSIGNED NOT NULL DEFAULT 0  AFTER `M95K_kills` , 
+ ADD COLUMN `M95K_deaths` INT(10) UNSIGNED NOT NULL DEFAULT 0  AFTER `M95K_hs` , 
+ ADD COLUMN `MP7_kills` INT(10) UNSIGNED NOT NULL DEFAULT 0 ,
+ ADD COLUMN `MP7_hs` INT(10) UNSIGNED NOT NULL DEFAULT 0 ,
+ ADD COLUMN `MP7_deaths` INT(10) UNSIGNED NOT NULL DEFAULT 0 ,
+ ADD COLUMN `QLZ8_kills` INT(10) UNSIGNED NOT NULL DEFAULT 0 ,
+ ADD COLUMN `QLZ8_hs` INT(10) UNSIGNED NOT NULL DEFAULT 0 ,
+ ADD COLUMN `QLZ8_deaths` INT(10) UNSIGNED NOT NULL DEFAULT 0');
+PREPARE stmt13 FROM @sqltext;
+EXECUTE stmt13;
+SET @sqltext = CONCAT('ALTER TABLE tbl_playerstats',@SUFFIX,' ENGINE = InnoDB');
+PREPARE stmt14 FROM @sqltext;
+EXECUTE stmt14;
+SET @sqltext = CONCAT('ALTER TABLE tbl_weaponstats',@SUFFIX,' ENGINE = InnoDB');
+PREPARE stmt15 FROM @sqltext;
+EXECUTE stmt15;
+SET @sqltext = CONCAT('ALTER TABLE tbl_playerdata',@SUFFIX,' ENGINE = InnoDB');
+PREPARE stmt16 FROM @sqltext;
+EXECUTE stmt16;
+SET @sqltext = CONCAT('ALTER TABLE tbl_playerstats',@SUFFIX,'_old ENGINE = InnoDB');
+PREPARE stmt17 FROM @sqltext;
+EXECUTE stmt17;
+SET @sqltext = CONCAT('ALTER TABLE tbl_mapstats',@SUFFIX,' CHANGE COLUMN `MapName` `MapName` VARCHAR(32) NULL DEFAULT NULL') ;
+PREPARE stmt18 FROM @sqltext;
+EXECUTE stmt18;
+
+#DEALLOCATE
+DEALLOCATE PREPARE stmt1;
+DEALLOCATE PREPARE stmt2;
+DEALLOCATE PREPARE stmt3;
+DEALLOCATE PREPARE stmt4;
+DEALLOCATE PREPARE stmt5;
+DEALLOCATE PREPARE stmt6;
+DEALLOCATE PREPARE stmt7;
+DEALLOCATE PREPARE stmt8;
+DEALLOCATE PREPARE stmt9;
+DEALLOCATE PREPARE stmt10;
+DEALLOCATE PREPARE stmt11;
+DEALLOCATE PREPARE stmt12;
+DEALLOCATE PREPARE stmt13;
+DEALLOCATE PREPARE stmt14;
+DEALLOCATE PREPARE stmt15;
+DEALLOCATE PREPARE stmt16;
+DEALLOCATE PREPARE stmt17;
+DEALLOCATE PREPARE stmt18;
+COMMIT;
